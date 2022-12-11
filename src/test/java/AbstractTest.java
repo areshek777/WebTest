@@ -1,3 +1,5 @@
+package org.example;
+
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -9,45 +11,43 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 
-
 public class AbstractTest {
-    private static WebDriver driver;
+
+    static WebDriver webDriver;
 
     @BeforeAll
-    static void init(){
+    static void setDriver(){
         WebDriverManager.chromedriver().setup();
         ChromeOptions options = new ChromeOptions();
         //options.addArguments("--incognito");
         //options.addArguments("--headless");
         options.addArguments("start-maximized");
-        driver = new ChromeDriver(options);
-        driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
+        options.setPageLoadTimeout(Duration.ofSeconds(10));
+
+
+        webDriver = new ChromeDriver(options);
+        webDriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
     }
 
     @BeforeEach
-    void goTo(){
-        Assertions.assertDoesNotThrow( ()-> driver.navigate().to("https://www.livejournal.com"),
+    void initMainPage(){
+        Assertions.assertDoesNotThrow( ()-> getWebDriver().navigate().to("https://www.livejournal.com/"),
                 "Страница не доступна");
-            Actions actions = new Actions(driver);
-                actions.click(driver.findElement(By.xpath(".//a[@href='https://www.livejournal.com/login.bml?returnto=https://www.livejournal.com/&ret=1']")))
-               .pause(1000l)
-               .sendKeys(driver.findElement(By.xpath(".//input[@id='user']")), "Testacc123")
-               .sendKeys(driver.findElement(By.xpath(".//input[@id='lj_loginwidget_password']")), "Qwerty12345678")
-               .click(driver.findElement((By.xpath(".//button[@ng-click='loginForm.loginUser($event)']"))));
+        Assertions.assertTrue(true);
 
     }
-
-
 
     @AfterAll
-    static void close(){
-        driver.quit();
+    public static void exit(){
+
+        if(webDriver !=null) webDriver.quit();
     }
 
-    public static WebDriver getDriver() {
-        return driver;
+    public WebDriver getWebDriver(){
+        return this.webDriver;
     }
 }
